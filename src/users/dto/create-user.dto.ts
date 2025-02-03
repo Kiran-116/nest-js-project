@@ -18,6 +18,10 @@ export class CreateUserDto {
     @MaxLength(100)
     email: string;
 
+    @IsNotEmpty()
+    @MaxLength(24)
+    username: string;
+
     @IsString()
     @IsOptional()
     gender?: string;
