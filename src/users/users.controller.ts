@@ -13,31 +13,12 @@ export class UsersController {i
     }
 
     @Get(':isMarried?')
-    getUsers(
-        @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number, 
-        @Query('page', new DefaultValuePipe(1), ParseIntPipe,) pipe: number,
-        @Param() param: GetUserParamDto
-    ) {
-        console.log(param);
-        console.log(limit, pipe);
+    getUsers() {
         return this.usersService.getAllUsers();
-    }
-
-    @Get(':id')
-    getUsersById(@Param('id', ParseIntPipe) id: any) {          // This will be read as String. ParseIntPipe will convert it to number
-        console.log(typeof id, id);
-        return this.usersService.getUsersById(id);
     }
 
     @Post()
     creatUsers(@Body() user: CreateUserDto) {
-        console.log(user);
-        return `A new user with id ${user.id} has been created!`;
-    }
-
-    @Patch()
-    updateUser(@Body() user: UpdateUserDto) {
-        console.log(user);
-        return "User Updated Successfully!";
+        this.usersService.createUser(user);
     }
 }

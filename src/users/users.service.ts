@@ -1,49 +1,38 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { AuthService } from "src/auth/auth.service";
+import { Repository } from "typeorm";
+import { User } from "./user.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { CreateUserDto } from "./dto/create-user.dto";
 
 @Injectable()
 export class UsersService {
-    constructor(@Inject(forwardRef(() => AuthService)) private readonly authService: AuthService) {}
-
-    users: {id: number, name: string, email: string, gender: string, isMarried: boolean, password: string }[] = [
-        {
-            id: 1,
-            name: "John",
-            email: "john@gmail.com",
-            gender: "male",
-            isMarried: false,
-            password: 'test1234'
-        }, 
-        {
-            id: 2,
-            name: "Mark",
-            email: "mark@gmail.com",
-            gender: "male",
-            isMarried: true,
-            password: 'test1234'
-        }, 
-        {
-            id: 3,
-            name: "Sarah",
-            email: "sarah@gmail.com",
-            gender: "female",
-            isMarried: false,
-            password: 'test1234'
-        }, 
-    ]
+    constructor(
+        @InjectRepository(User)
+        private userRepository: Repository<User>
+    ) {}
 
     getAllUsers() {
-        if (this.authService.isAuthenticated) {
-            return this.users;
+        return this.userRepository.find();
+    }
+
+    public async createUser(userDto: CreateUserDto) {
+        // Validate if a user exists with the given email
+        const user = await this.userRepository.findOne({
+            where: {
+                email: userDto.email
+            }
+        })
+
+        // Handle the Error / Exception
+        if (user) {
+            throw new Error("User already exists with the given email.");
         }
-        return "You are not logged in!";
-    }
 
-    getUsersById(id: number) {
-        return this.users.find(user => user.id === id);
-    }
-
-    createUser(user: {id: number, name: string, email: string, gender: string, isMarried: boolean, password: string }) {
-        this.users.push(user);
+        // Create that User:
+        let newUser = this.userRepository.create(userDto);
+        newUser = await this.userRepository.save(newUser);
+        
+        return newUser;
     }
 }
